@@ -1,14 +1,37 @@
 <template>
-  <div class="recommend-list">
-    <h1 class="list-title">热门歌单推荐</h1>
+  <div class="recommend">
+    <div class="recommend-content">
+      <div v-if="recommends.length" class="slider-wrapper">
+        <slider>
+          <div v-for="item in recommends" :key="item.id">
+            <a :href="item.linkUrl">
+              <img :src="item.picUrl">
+            </a>
+          </div>
+        </slider>
+      </div>
+    </div>
+    <div class="recommend-list">
+      <h1 class="list-title">热门歌单推荐</h1>
+      <ul></ul>
+    </div>
   </div>
 </template>
 
 <script>
 import { getRecommend } from 'api/recommend'
+import Slider from 'base/slider/slider'
 import { ERR_OK } from 'api/config'
 
 export default {
+  components: {
+    Slider
+  },
+  data () {
+    return {
+      recommends: []
+    }
+  },
   created () {
     this._getRecommend()
   },
@@ -16,6 +39,7 @@ export default {
     _getRecommend () {
       getRecommend().then((res) => {
         if (res.code === ERR_OK) {
+          this.recommends = res.data.slider
           console.log(res.data.slider)
         }
       })
@@ -25,8 +49,7 @@ export default {
 </script>
 
 <style scoped lang="stylus" rel="stylesheet/stylus">
-  @import "~assets/stylus/variable"
-
+    @import "~assets/stylus/variable"
   .recommend
     position: fixed
     width: 100%
@@ -40,7 +63,7 @@ export default {
         width: 100%
         height: 0
         padding-top: 40%
-        overflow: hidden
+        // overflow: hidden
         .slider-content
           position: absolute
           top: 0
