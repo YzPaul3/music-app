@@ -4,6 +4,9 @@
       <slot>
       </slot>
     </div>
+    <div class="dots">
+      <span class="dot" :class="{active: currentPageIndex === index}" v-for="(item, index) in dots" :key="index">{{index}}</span>
+    </div>
   </div>
 </template>
 <script>
@@ -27,10 +30,20 @@ export default {
       default: 4000
     }
   },
+  data () {
+    return {
+      dots: [],
+      currentPageIndex: 0
+    }
+  },
   mounted () {
     setTimeout(() => {
       this._setSliderWidth()
+      this._initDots()
       this._initSlider()
+      if (this.autoPlay) {
+        this._play()
+      }
     }, 20)
   },
   methods: {
@@ -52,6 +65,16 @@ export default {
       }
       this.$refs.sliderGroup.style.width = width + 'px'
     },
+    _initDots () {
+      this.dots = new Array(this.children.length)
+    },
+    _onScrollEnd () {
+      let pageIndex = this.slider.getCurrentPage().pageX
+      this.currentPageIndex = pageIndex
+      if (this.autoPlay) {
+        this._play()
+      }
+    },
     // 初始化slider
     _initSlider () {
       this.slider = new BScroll(this.$refs.slider, {
@@ -64,6 +87,15 @@ export default {
           speed: 400
         }
       })
+
+      // 绑定事件，每一次滚动结束时
+      this.slider.on('scrollEnd', this._onScrollEnd)
+    },
+    _play () {
+      clearTimeout(this.timer)
+      this.timer = setTimeout(() => {
+        this.slider.next()
+      }, this.interval)
     }
   }
 }
